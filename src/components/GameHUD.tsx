@@ -20,6 +20,7 @@ interface GameHUDProps {
     rank: RankTier;
     activePerks: string[];
     invisibilityTimeLeft: number;
+    targetKills?: number;
   };
   hitmarker: { active: boolean; isHeadshot: boolean } | null;
   killFeed: KillFeedEntry[];
@@ -131,11 +132,11 @@ export const GameHUD: React.FC<GameHUDProps> = ({
           )}
 
           <div className="bg-slate-950/80 border border-slate-800 px-5 py-1.5 rounded-full flex items-center gap-4 text-xs font-bold text-slate-300 shadow-md">
-            <span>BAJAS: <span className="text-emerald-400 text-sm">{stats.kills}</span></span>
+            <span>BAJAS: <span className="text-emerald-400 text-sm font-black">{stats.kills}</span><span className="text-slate-500 font-mono text-[11px]">/{stats.targetKills || 15}</span></span>
             <span className="text-slate-600">|</span>
-            <span>MUERTES: <span className="text-red-400 text-sm">{stats.deaths}</span></span>
+            <span>MUERTES: <span className="text-red-400 text-sm font-black">{stats.deaths}</span></span>
             <span className="text-slate-600">|</span>
-            <span>PUNTOS: <span className="text-amber-400 text-sm">{stats.score}</span></span>
+            <span>PUNTOS: <span className="text-amber-400 text-sm font-black">{stats.score}</span></span>
           </div>
         </div>
 

@@ -8,6 +8,7 @@ import { RankModal } from './components/RankModal';
 import { InventoryModal } from './components/InventoryModal';
 import { MainMenu } from './components/MainMenu';
 import { DownloadApkModal } from './components/DownloadApkModal';
+import { MatchEndModal } from './components/MatchEndModal';
 import { HorizontalControls } from './components/HorizontalControls';
 import { OrientationWarning } from './components/OrientationWarning';
 import { RankTier, KillFeedEntry, PlayerScore, P2WItem, SkinItem, RouletteItem } from './types/game';
@@ -38,6 +39,22 @@ export default function App() {
     rank: 'Plata' as RankTier,
     activePerks: [] as string[],
     invisibilityTimeLeft: 0,
+    targetKills: 15,
+  });
+
+  // Match End Result State
+  const [matchEndState, setMatchEndState] = useState<{
+    isOpen: boolean;
+    result: 'victory' | 'defeat';
+    kills: number;
+    deaths: number;
+    score: number;
+  }>({
+    isOpen: false,
+    result: 'victory',
+    kills: 0,
+    deaths: 0,
+    score: 0,
   });
 
   // Hitmarker indicator state
@@ -130,6 +147,21 @@ export default function App() {
       },
       onLockChange: (locked) => {
         setIsLocked(locked);
+      },
+      onMatchEnd: (result, finalKills, finalScore) => {
+        if (document.exitPointerLock) {
+          document.exitPointerLock();
+        }
+        setMatchEndState({
+          isOpen: true,
+          result,
+          kills: finalKills,
+          deaths: stats.deaths,
+          score: finalScore,
+        });
+        // Bonus reward coins
+        const bonusCoins = result === 'victory' ? 1500 : 400;
+        setCoins((c) => c + bonusCoins);
       },
     });
 
@@ -378,6 +410,36 @@ export default function App() {
       <DownloadApkModal
         isOpen={isApkModalOpen}
         onClose={() => setIsApkModalOpen(false)}
+      />
+
+      <MatchEndModal
+        isOpen={matchEndState.isOpen}
+        result={matchEndState.result}
+        kills={matchEndState.kills}
+        deaths={matchEndState.deaths}
+        score={matchEndState.score}
+        onPlayAgain={() => {
+          setMatchEndState((prev) => ({ ...prev, isOpen: false }));
+          if (engineRef.current) {
+            engineRef.current.resetMatch();
+          }
+          soundEngine.init();
+          soundEngine.playJumpPad();
+          soundEngine.startAmbientMusic();
+          setTimeout(() => {
+            const canvas = canvasMountRef.current?.querySelector('canvas');
+            if (canvas && !document.pointerLockElement) {
+              canvas.requestPointerLock();
+            }
+          }, 150);
+        }}
+        onBackToMenu={() => {
+          setMatchEndState((prev) => ({ ...prev, isOpen: false }));
+          handleExitMatch();
+        }}
+        onOpenDownloadApk={() => {
+          setIsApkModalOpen(true);
+        }}
       />
     </div>
   );

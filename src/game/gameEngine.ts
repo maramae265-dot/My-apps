@@ -31,11 +31,13 @@ export interface GameEngineCallbacks {
     rank: RankTier;
     activePerks: string[];
     invisibilityTimeLeft: number;
+    targetKills: number;
   }) => void;
   onHitmarker: (isHeadshot: boolean) => void;
   onKill: (victim: string, weapon: string, isHeadshot: boolean, isP2W: boolean) => void;
   onPlayerDeath: (killer: string) => void;
   onLockChange: (isLocked: boolean) => void;
+  onMatchEnd: (result: 'victory' | 'defeat', finalKills: number, finalScore: number) => void;
 }
 
 export class GameEngine {
@@ -71,6 +73,9 @@ export class GameEngine {
   private reloadTimer: number = 0;
   private shootCooldown: number = 0;
   private invisibilityTimer: number = 0;
+  private matchEnded: boolean = false;
+  private targetKills: number = 15;
+  private deathCamTilt: number = 0;
 
   // Movement & Camera
   private playerPos = new THREE.Vector3(0, 1.7, 25);
@@ -532,6 +537,12 @@ export class GameEngine {
     const isP2W = this.unlockedP2wIds.size > 0;
     this.callbacks.onKill(victimName, this.currentWeapon.name, isHeadshot, isP2W);
     this.emitStats();
+
+    // Check Victory Condition (Target 15 kills)
+    if (this.kills >= this.targetKills && !this.matchEnded) {
+      this.matchEnded = true;
+      this.callbacks.onMatchEnd('victory', this.kills, this.score);
+    }
   }
 
   private spawnTracer(from: THREE.Vector3, to: THREE.Vector3, colorHex: string) {
@@ -576,8 +587,8 @@ export class GameEngine {
     this.spawnTracer(origin, end, isP2W ? '#facc15' : '#ef4444');
 
     if (proj > 0 && Math.abs(proj - dist) < 0.9) {
-      // Direct hit on player!
-      const botDamage = isP2W ? 45 : 20;
+      // Balanced bot damage: fair and enjoyable (not overly aggressive)
+      const botDamage = isP2W ? 16 : 10;
 
       // Absorb shield first
       if (this.shield > 0) {
@@ -609,6 +620,12 @@ export class GameEngine {
     this.callbacks.onPlayerDeath(killer);
     this.emitStats();
 
+    // Check Defeat if deaths become excessive
+    if (this.deaths >= 10 && !this.matchEnded) {
+      this.matchEnded = true;
+      this.callbacks.onMatchEnd('defeat', this.kills, this.score);
+    }
+
     // Respawn after 3 seconds
     setTimeout(() => {
       this.respawnPlayer();
@@ -620,12 +637,21 @@ export class GameEngine {
     this.shield = this.maxShield;
     this.ammo = this.currentWeapon.magazineSize;
     this.isAlive = true;
+    this.camera.rotation.z = 0;
     if (this.arena) {
       const spawn = this.arena.spawnPoints[0];
       this.playerPos.set(spawn.x, 1.7, spawn.z);
       this.playerVel.set(0, 0, 0);
     }
     this.emitStats();
+  }
+
+  public resetMatch() {
+    this.kills = 0;
+    this.deaths = 0;
+    this.score = 0;
+    this.matchEnded = false;
+    this.respawnPlayer();
   }
 
   private updatePlayerPhysics(dt: number) {
@@ -739,6 +765,7 @@ export class GameEngine {
       rank,
       activePerks,
       invisibilityTimeLeft: Math.max(0, this.invisibilityTimer),
+      targetKills: this.targetKills,
     });
   }
 
@@ -749,6 +776,12 @@ export class GameEngine {
     const rawDt = (now - this.lastTime) / 1000;
     this.lastTime = now;
     const dt = Math.min(rawDt, 0.05); // Clamp dt
+
+    // Death camera fall and roll animation
+    if (!this.isAlive) {
+      this.camera.position.y = THREE.MathUtils.damp(this.camera.position.y, 0.42, 6, dt);
+      this.camera.rotation.z = THREE.MathUtils.damp(this.camera.rotation.z, -0.38, 5, dt);
+    }
 
     // Update Player
     this.updatePlayerPhysics(dt);
