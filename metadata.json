@@ -1,0 +1,6 @@
+{
+  "name": "CYBER APEX: 3D FPS Arena P2W",
+  "description": "Shooter multijugador 3D competitivo con chat global en vivo, sistema de rangos, ruleta de aspectos legendarios y tienda Pay-to-Win con integración directa de pagos PayPal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
