@@ -7,6 +7,7 @@ import { RouletteModal } from './components/RouletteModal';
 import { RankModal } from './components/RankModal';
 import { InventoryModal } from './components/InventoryModal';
 import { MainMenu } from './components/MainMenu';
+import { DownloadApkModal } from './components/DownloadApkModal';
 import { HorizontalControls } from './components/HorizontalControls';
 import { OrientationWarning } from './components/OrientationWarning';
 import { RankTier, KillFeedEntry, PlayerScore, P2WItem, SkinItem, RouletteItem } from './types/game';
@@ -71,6 +72,7 @@ export default function App() {
   const [isRouletteOpen, setIsRouletteOpen] = useState(false);
   const [isRankOpen, setIsRankOpen] = useState(false);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
+  const [isApkModalOpen, setIsApkModalOpen] = useState(false);
 
   // Initialize Three.js Game Engine once on mount
   useEffect(() => {
@@ -142,7 +144,7 @@ export default function App() {
   // Keyboard shortcut listener for Start Game (Space/Enter) in Menu
   useEffect(() => {
     const handleGlobalKey = (e: KeyboardEvent) => {
-      if (gameState === 'menu' && !isStoreOpen && !isRouletteOpen && !isRankOpen && !isInventoryOpen) {
+      if (gameState === 'menu' && !isStoreOpen && !isRouletteOpen && !isRankOpen && !isInventoryOpen && !isApkModalOpen) {
         if (e.code === 'Space' || e.code === 'Enter') {
           e.preventDefault();
           handleStartGame('ffa');
@@ -153,12 +155,13 @@ export default function App() {
         else if (isRouletteOpen) setIsRouletteOpen(false);
         else if (isRankOpen) setIsRankOpen(false);
         else if (isInventoryOpen) setIsInventoryOpen(false);
+        else if (isApkModalOpen) setIsApkModalOpen(false);
       }
     };
 
     window.addEventListener('keydown', handleGlobalKey);
     return () => window.removeEventListener('keydown', handleGlobalKey);
-  }, [gameState, isStoreOpen, isRouletteOpen, isRankOpen, isInventoryOpen]);
+  }, [gameState, isStoreOpen, isRouletteOpen, isRankOpen, isInventoryOpen, isApkModalOpen]);
 
   // Handle Game Start
   const handleStartGame = (gameMode: string) => {
@@ -263,6 +266,7 @@ export default function App() {
             onOpenRoulette={() => setIsRouletteOpen(true)}
             onOpenRank={() => setIsRankOpen(true)}
             onOpenInventory={() => setIsInventoryOpen(true)}
+            onOpenDownloadApk={() => setIsApkModalOpen(true)}
             playerRank={stats.rank}
             playerElo={stats.elo}
             coins={coins}
@@ -299,6 +303,10 @@ export default function App() {
             onOpenInventory={() => {
               if (document.exitPointerLock) document.exitPointerLock();
               setIsInventoryOpen(true);
+            }}
+            onOpenDownloadApk={() => {
+              if (document.exitPointerLock) document.exitPointerLock();
+              setIsApkModalOpen(true);
             }}
             onExitMatch={handleExitMatch}
           />
@@ -365,6 +373,11 @@ export default function App() {
         onEquipSkin={handleEquipSkin}
         onBuySkin={handleBuySkin}
         currentCoins={coins}
+      />
+
+      <DownloadApkModal
+        isOpen={isApkModalOpen}
+        onClose={() => setIsApkModalOpen(false)}
       />
     </div>
   );

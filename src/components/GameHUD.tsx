@@ -29,6 +29,7 @@ interface GameHUDProps {
   onOpenRoulette: () => void;
   onOpenRank: () => void;
   onOpenInventory: () => void;
+  onOpenDownloadApk?: () => void;
   onExitMatch: () => void;
 }
 
@@ -42,6 +43,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
   onOpenRoulette,
   onOpenRank,
   onOpenInventory,
+  onOpenDownloadApk,
   onExitMatch,
 }) => {
   const [showScoreboard, setShowScoreboard] = useState(false);
@@ -141,6 +143,15 @@ export const GameHUD: React.FC<GameHUDProps> = ({
         <div className="flex flex-col items-end gap-2">
           {/* Quick HUD controls */}
           <div className="flex items-center gap-2 pointer-events-auto">
+            {onOpenDownloadApk && (
+              <button
+                onClick={onOpenDownloadApk}
+                className="px-2.5 py-1.5 rounded-lg bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1"
+                title="Descargar APK Android"
+              >
+                <span>APK</span>
+              </button>
+            )}
             <button
               onClick={toggleSound}
               className="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition"

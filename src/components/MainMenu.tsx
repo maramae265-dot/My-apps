@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Zap, Disc, Trophy, Shirt, ExternalLink, ShieldCheck, Copy, Check, Radio, Volume2, VolumeX, Sparkles, Crown } from 'lucide-react';
+import { Play, Zap, Disc, Trophy, Shirt, ExternalLink, ShieldCheck, Copy, Check, Radio, Volume2, VolumeX, Sparkles, Crown, Download, Smartphone } from 'lucide-react';
 import { RankTier } from '../types/game';
 import { RANKS, PAYPAL_RECEIVER_EMAIL, buildPayPalUrl } from '../game/constants';
 import { soundEngine } from '../audio/soundEngine';
@@ -10,6 +10,7 @@ interface MainMenuProps {
   onOpenRoulette: () => void;
   onOpenRank: () => void;
   onOpenInventory: () => void;
+  onOpenDownloadApk: () => void;
   playerRank: RankTier;
   playerElo: number;
   coins: number;
@@ -23,6 +24,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   onOpenRoulette,
   onOpenRank,
   onOpenInventory,
+  onOpenDownloadApk,
   playerRank,
   playerElo,
   coins,
@@ -88,6 +90,14 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             <span style={{ color: currentRankInfo.color }}>{playerRank}</span>
             <span className="text-slate-400 font-mono">({playerElo} RP)</span>
           </div>
+
+          <button
+            onClick={onOpenDownloadApk}
+            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-emerald-500/25 transition transform hover:scale-105 active:scale-95"
+          >
+            <Smartphone className="w-4 h-4 text-emerald-300" />
+            <span>DESCARGAR APK</span>
+          </button>
 
           <button
             onClick={toggleMute}
@@ -236,6 +246,13 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             className="px-4 py-2.5 rounded-xl bg-slate-950/80 hover:bg-slate-900 border border-slate-700 text-slate-300 text-xs font-bold flex items-center gap-2 shadow-md transition"
           >
             <Shirt className="w-4 h-4 text-slate-400" /> Trajes Legendarios
+          </button>
+
+          <button
+            onClick={onOpenDownloadApk}
+            className="px-4 py-2.5 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/50 text-emerald-300 text-xs font-bold flex items-center gap-2 shadow-md transition"
+          >
+            <Download className="w-4 h-4 text-emerald-400" /> Descargar APK Android
           </button>
         </div>
 
